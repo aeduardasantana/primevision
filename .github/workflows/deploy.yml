@@ -1,0 +1,37 @@
+name: Publicar Prime Vision na Locaweb
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-primevision
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter arquivos do Prime Vision
+        uses: actions/checkout@v4
+
+      - name: Preparar somente arquivos públicos
+        run: |
+          mkdir -p publicacao
+          cp index.html publicacao/index.html
+
+      - name: Enviar para a pasta do subdomínio na Locaweb
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASS }}
+          port: 21
+          protocol: ftp
+          local-dir: ./publicacao/
+          server-dir: ./public_html/primevision/
+          dangerous-clean-slate: false
